@@ -3,9 +3,22 @@ const express = require('express');
 const routes = require('./routes');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('../swagger');
+const getDb = require('./models');
 
 // Initialize express app
 const app = express();
+
+// Initialize DB connection early and attempt sync if configured
+(async () => {
+  try {
+    const db = getDb();
+    await db.sequelize.authenticate();
+    await db.syncDatabase();
+    console.log('[DB] Connection established successfully');
+  } catch (err) {
+    console.error('[DB] Unable to connect to the database:', err.message);
+  }
+})();
 
 app.use(cors({
   origin: '*',
@@ -40,6 +53,31 @@ app.use('/docs', swaggerUi.serve, (req, res, next) => {
 
 // Parse JSON request body
 app.use(express.json());
+
+// DB health endpoint
+/**
+ * @swagger
+ * /db/health:
+ *   get:
+ *     tags:
+ *       - Database
+ *     summary: Database health check
+ *     description: Returns connectivity status to the configured database.
+ *     responses:
+ *       200:
+ *         description: Database connection works.
+ *       500:
+ *         description: Database connection failed.
+ */
+app.get('/db/health', async (req, res) => {
+  const db = getDb();
+  try {
+    await db.sequelize.authenticate();
+    return res.status(200).json({ status: 'ok', message: 'Database connected' });
+  } catch (e) {
+    return res.status(500).json({ status: 'error', message: e.message });
+  }
+});
 
 // Mount routes
 app.use('/', routes);
