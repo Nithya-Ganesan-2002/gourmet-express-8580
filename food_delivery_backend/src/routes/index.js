@@ -1,13 +1,29 @@
 const express = require('express');
 const healthController = require('../controllers/health');
 
+const authRoutes = require('./auth');
+const restaurantRoutes = require('./restaurants');
+const cartRoutes = require('./cart');
+const ordersRoutes = require('./orders');
+const profileRoutes = require('./profile');
+
 const router = express.Router();
-// Health endpoint
+
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
 
 /**
  * @swagger
  * /:
  *   get:
+ *     tags: [Health]
  *     summary: Health endpoint
  *     responses:
  *       200:
@@ -31,5 +47,12 @@ const router = express.Router();
  *                   example: development
  */
 router.get('/', healthController.check.bind(healthController));
+
+// Mount domain routes
+router.use('/auth', authRoutes);
+router.use('/restaurants', restaurantRoutes);
+router.use('/cart', cartRoutes);
+router.use('/orders', ordersRoutes);
+router.use('/profile', profileRoutes);
 
 module.exports = router;

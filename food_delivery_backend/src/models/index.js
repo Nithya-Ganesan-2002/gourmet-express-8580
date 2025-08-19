@@ -41,6 +41,10 @@ db.Order = require('./order')(sequelize, DataTypes);
 db.OrderItem = require('./orderItem')(sequelize, DataTypes);
 db.OrderHistory = require('./orderHistory')(sequelize, DataTypes);
 
+// Newly added models
+db.Cart = require('./cart')(sequelize, DataTypes);
+db.CartItem = require('./cartItem')(sequelize, DataTypes);
+
 // Associations
 function applyAssociations() {
   // User -> UserProfile (1:1)
@@ -74,6 +78,22 @@ function applyAssociations() {
   // User (as actor) -> OrderHistory (1:N)
   db.User.hasMany(db.OrderHistory, { foreignKey: { name: 'actor_user_id', allowNull: true }, as: 'actions' });
   db.OrderHistory.belongsTo(db.User, { foreignKey: { name: 'actor_user_id', allowNull: true }, as: 'actor' });
+
+  // User -> Cart (1:1)
+  db.User.hasOne(db.Cart, { foreignKey: { name: 'user_id', allowNull: false }, as: 'cart', onDelete: 'CASCADE' });
+  db.Cart.belongsTo(db.User, { foreignKey: { name: 'user_id', allowNull: false }, as: 'user' });
+
+  // Restaurant -> Cart (Many carts may be locked to a restaurant)
+  db.Restaurant.hasMany(db.Cart, { foreignKey: { name: 'restaurant_id', allowNull: true }, as: 'carts' });
+  db.Cart.belongsTo(db.Restaurant, { foreignKey: { name: 'restaurant_id', allowNull: true }, as: 'restaurant' });
+
+  // Cart -> CartItem (1:N)
+  db.Cart.hasMany(db.CartItem, { foreignKey: { name: 'cart_id', allowNull: false }, as: 'items', onDelete: 'CASCADE' });
+  db.CartItem.belongsTo(db.Cart, { foreignKey: { name: 'cart_id', allowNull: false }, as: 'cart' });
+
+  // MenuItem -> CartItem (1:N)
+  db.MenuItem.hasMany(db.CartItem, { foreignKey: { name: 'menu_item_id', allowNull: false }, as: 'cartItems' });
+  db.CartItem.belongsTo(db.MenuItem, { foreignKey: { name: 'menu_item_id', allowNull: false }, as: 'menuItem' });
 }
 
 applyAssociations();

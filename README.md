@@ -2,6 +2,17 @@
 
 This repository contains a fullstack food delivery application.
 
+## Backend API Overview
+
+Key endpoints (see /docs for full OpenAPI):
+- Auth: POST /auth/register, POST /auth/login, GET /auth/me
+- Restaurants: GET /restaurants, GET /restaurants/{id}, GET /restaurants/{id}/menu
+- Cart: GET /cart, POST /cart/items, PUT /cart/items/{itemId}, DELETE /cart/items/{itemId}, POST /cart/clear, POST /cart/checkout
+- Orders: GET /orders, GET /orders/{id}, PATCH /orders/{id}/status
+- Profile: GET /profile, PUT /profile
+
+Use Authorization: Bearer <token> for protected routes.
+
 ## Backend Database Setup
 
 The backend uses Sequelize ORM with PostgreSQL by default. You can switch to another dialect by changing `DB_DIALECT` and corresponding driver packages.
